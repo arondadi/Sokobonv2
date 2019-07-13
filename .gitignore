@@ -4,3 +4,5 @@ Debug/
 
 # Ignore .vcxproj files
 *.vcxproj
+*.vcxproj.files
+*.vcxproj.user

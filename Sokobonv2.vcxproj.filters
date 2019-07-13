@@ -36,6 +36,9 @@
     <ClInclude Include="Block.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp">
@@ -56,10 +59,21 @@
     <ClCompile Include="Block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt">
       <Filter>Resource Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="SF Old Republic.ttf">
+      <Filter>Source Files</Filter>
+    </Font>
+    <Font Include="..\..\..\..\Downloads\Open_Sans\OpenSans-Regular.ttf">
+      <Filter>Source Files</Filter>
+    </Font>
   </ItemGroup>
 </Project>

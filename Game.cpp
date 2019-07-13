@@ -13,36 +13,42 @@ Game::Game():
 {
 
 	//Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	//Start up SDL and create window
+	if (!init())
 	{
-		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+		printf("Failed to initialize!\n");
 	}
 	else
 	{
-		//Create window
-		SDL_CreateWindowAndRenderer(globals::SCREEN_WIDTH, globals::SCREEN_HEIGHT, SDL_WINDOW_OPENGL, &m_window, &m_renderer);
-		if (m_window == NULL)
-		{
-			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-		}
-		else
-		{
-			// Gameloop that runs indefenently
-			gameLoop();
-			
-		}
+		// Gameloop that runs indefenently
+		gameLoop();
 	}
+
 }
 
 Game::~Game()
 {
+
+	//Free loaded images
+	//m_text_texture.free();
+
+	//Free global font
+	//TTF_CloseFont(m_font);
+	//m_font = NULL;
+
+	ui.~UI();
+
 	// Destroy renderer
 	SDL_DestroyRenderer(m_renderer);
+	m_renderer = NULL;
 
 	// Destroy window
 	SDL_DestroyWindow(m_window);
+	m_window = NULL;
 
 	//Quit SDL subsystems
+	TTF_Quit();
+	IMG_Quit();
 	SDL_Quit();
 }
 
@@ -50,31 +56,26 @@ void Game::gameLoop()
 {
 	Input input;
 
+	UI ui;
+
+	ui.loadFont("Lazy.ttf", 60);
+
 	// Spawns the player at position (x,y)
 	m_player = Player(globals::PLAYER_SPAWN_X, globals::PLAYER_SPAWN_Y);
 
 	SDL_Event event;
 
+	// Load texture media test
+	// m_text_texture = loadMedia();
+	
 	// Initialize random seed so rand is not the same every time
 	srand(time(NULL));
 
-	//// Adding blocks manually
-	//m_blocks.push_back(Block(globals::SCREEN_WIDTH / 2, 128+32));
-	//m_blocks.push_back(Block(globals::SCREEN_WIDTH / 2, 128+64));
-	//m_blocks.push_back(Block(globals::SCREEN_WIDTH / 2 + 32, 128));
-	//m_blocks.push_back(Block(globals::SCREEN_WIDTH / 2 + 64, 128));
-
-	//for (int pos = 0; pos < m_blocks.size(); pos++)
-	//{
-	//	m_board[m_blocks.at(pos).getX() / globals::BLOCK_SIZE][m_blocks.at(pos).getY() / globals::BLOCK_SIZE ] = true;
-	//}
-
-
 	//m_level = Level();
 
-	int time_since_last_frame = SDL_GetTicks();
+	float time_since_last_frame = SDL_GetTicks();
 
-	int time_last_move = SDL_GetTicks();
+	float time_last_move = SDL_GetTicks();
 
 	while (true)
 	{
@@ -82,7 +83,7 @@ void Game::gameLoop()
 		while (!game_over)
 		{
 			// Movement tick
-			int time_elapsed_move = SDL_GetTicks();
+			float time_elapsed_move = SDL_GetTicks();
 
 			if (time_elapsed_move - time_last_move > globals::MOVEMENT_TICK)
 			{
@@ -98,11 +99,13 @@ void Game::gameLoop()
 						input.keyUpEvent(event);
 					}
 					else if (event.type == SDL_QUIT) {
+						this->~Game();
 						return;
 					}
 				}
 
 				if (input.wasKeyPressed(SDL_SCANCODE_ESCAPE) == true) {
+					this->~Game();
 					return;
 				}
 				else if (input.wasKeyPressed(SDL_SCANCODE_LEFT) == true || input.isKeyHeld(SDL_SCANCODE_LEFT)) {
@@ -122,14 +125,18 @@ void Game::gameLoop()
 			}
 
 
-			int time_elapsed = SDL_GetTicks();
-
+			float time_elapsed = SDL_GetTicks();
+			
 			if (time_elapsed - time_since_last_frame > 1000 / globals::FRAME_RATE)
 			{
-				// printf("%d \n", 1000 / (time_elapsed - time_since_last_frame) );
+
+				// Frame rate to be sent to UI
+				float frame_rate = 1000 / (time_elapsed - time_since_last_frame);
+				// printf("Time elapsed: %.2f, time since last frame: %.2f, frame rate: %.4f \n", time_elapsed, time_since_last_frame, 1000 / (time_elapsed - time_since_last_frame));
+
 				this->update();
 
-				this->draw(m_renderer);
+				this->draw(m_renderer, frame_rate);
 
 				time_since_last_frame = SDL_GetTicks();
 			}
@@ -137,6 +144,9 @@ void Game::gameLoop()
 		}
 
 		// Freezes the current renderer
+		// 0 in frame_rate argument as gameplay is frozen
+		this->draw(m_renderer, 0);
+
 		// The player can X out of window
 		while (game_over)
 		{
@@ -164,9 +174,6 @@ void Game::gameLoop()
 				game_over = false;
 			}
 
-
-			this->draw(m_renderer);
-
 		}
 
 		// Keep timers updated
@@ -174,7 +181,7 @@ void Game::gameLoop()
 		time_last_move = SDL_GetTicks();
 		time_block_falling = SDL_GetTicks();
 
-		// TODO: Implement restart function for game
+		// Implement restart function for game
 		this->restart();
 	}
 }
@@ -198,7 +205,6 @@ void Game::update()
 
 				// Moves the blocks location in the game
 				m_blocks.at(i).move(dx, dy);
-
 			}
 			else
 			{
@@ -260,8 +266,6 @@ void Game::update()
 		int spawn_pos = (((rand() % 10)) * globals::BLOCK_SIZE) + (globals::SCREEN_WIDTH / 2 - globals::BLOCK_SIZE * 5);
 		// int spawn_pos2 = (((rand() % 20)) * globals::BLOCK_SIZE) + (globals::SCREEN_HEIGHT / 2 - globals::BLOCK_SIZE * 5);
 
-		printf("spawn pos: %d \n", spawn_pos);
-
 		// Makes a new block in the m_block vector
 		m_blocks.push_back(Block(spawn_pos, 0));
 
@@ -286,11 +290,12 @@ void Game::restart()
 
 	m_player.move_to_spawn();	
 
-	this->draw(m_renderer);
+	this->draw(m_renderer, 0);
 }
 
-void Game::draw(SDL_Renderer *renderer)
+void Game::draw(SDL_Renderer *renderer, float frame_rate)
 {
+
 	// Color the background black
 	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0xfff);
 
@@ -302,12 +307,110 @@ void Game::draw(SDL_Renderer *renderer)
 	// Draw the player object in the backbuffer
 	m_player.draw(m_renderer);
 
+	ui.drawFPS(m_renderer, frame_rate);
+
+	
 	for (int i = 0; i < m_blocks.size(); i++)
 	{
 		m_blocks.at(i).draw(m_renderer);
 	}
-	
+
+	if (game_over)
+	{
+		ui.drawRestartScreen(m_renderer);
+	}
 
 	//Flip backbuffer and frontbuffer 
 	SDL_RenderPresent(m_renderer);
 }
+
+
+
+bool Game::init()
+{
+	//Initialization flag
+	bool success = true;
+
+	//Initialize SDL
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
+		success = false;
+	}
+	else
+	{
+		//Set texture filtering to linear
+		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
+		{
+			printf("Warning: Linear texture filtering not enabled!");
+		}
+
+		//Create window
+		m_window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, globals::SCREEN_WIDTH, globals::SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		if (m_window == NULL)
+		{
+			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
+			success = false;
+		}
+		else
+		{
+			//Create vsynced renderer for window
+			m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+			if (m_renderer == NULL)
+			{
+				printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
+				success = false;
+			}
+			else
+			{
+				//Initialize renderer color
+				SDL_SetRenderDrawColor(m_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+				//Initialize PNG loading
+				int imgFlags = IMG_INIT_PNG;
+				if (!(IMG_Init(imgFlags) & imgFlags))
+				{
+					printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+					success = false;
+				}
+
+				//Initialize SDL_ttf
+				if (TTF_Init() == -1)
+				{
+					printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
+					success = false;
+				}
+			}
+		}
+	}
+
+	return success;
+}
+
+//LTexture Game::loadMedia()
+//{
+//	//Loading success flag
+//	bool success = true;
+//
+//	//Open the font
+//	m_font = TTF_OpenFont("Lazy.ttf", 60);
+//
+//	if (m_font == NULL)
+//	{
+//		printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
+//		success = false;
+//	}
+//	else
+//	{
+//		// Render text
+//		SDL_Color text_color = { 255, 255, 255 };
+//		if (!m_text_texture.loadFromRenderedText("Test Text!", text_color, m_font, m_renderer))
+//		{
+//			printf("Failed to render text Texture!\n");
+//			success = false;
+//		}
+//	}
+//
+//	return m_text_texture;
+//
+//}

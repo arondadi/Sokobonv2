@@ -3,6 +3,9 @@
 
 
 #include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+
 #include <stdio.h>
 #include <vector>
 #include <stdlib.h>
@@ -14,6 +17,7 @@
 #include "Level.h"
 #include "Input.h"
 #include "Block.h"
+#include "UI.h"
 
 class Game
 {
@@ -27,9 +31,15 @@ private:
 	SDL_Renderer *m_renderer;
 	SDL_Surface *m_screenSurface;
 
+	// Font and texture
+	//TTF_Font *m_font;
+	//LTexture m_text_texture;
+
 	Player m_player;
 	std::vector<Block> m_blocks;
 	Level m_level;
+
+	UI ui;
 
 	// Checks for loose conditions
 	bool game_over;
@@ -40,11 +50,17 @@ private:
 	// Data structure to keep track of the location of blocks in the board
 	bool m_board[globals::SCREEN_WIDTH / globals::BLOCK_SIZE][globals::SCREEN_HEIGHT / globals::BLOCK_SIZE];
 
-	void draw(SDL_Renderer *m_renderer);
+	void draw(SDL_Renderer *m_renderer, float frame_rate);
 
 	void update();
 
 	void restart();
+
+	// Initialize SDL
+	bool init();
+
+	// LTexture loadMedia();
+
 
 
 
