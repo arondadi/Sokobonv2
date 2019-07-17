@@ -5,6 +5,8 @@
 
 #include "Globals.h"
 
+enum colors { BLACK, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW, WHITE };
+
 class Block
 {
 public:
@@ -26,7 +28,7 @@ public:
 	// Get Y position
 	int getY();
 
-	void draw(SDL_Renderer *renderer);
+	void draw(SDL_Renderer *renderer, enum colors color);
 
 private:
 	int m_x, m_y;

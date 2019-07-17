@@ -7,7 +7,6 @@
 Game::Game():
 	m_window(NULL),
 	m_screenSurface(NULL),
-	m_board{false},
 	time_block_falling(SDL_GetTicks()),
 	game_over(false)
 {
@@ -28,15 +27,7 @@ Game::Game():
 
 Game::~Game()
 {
-
-	//Free loaded images
-	//m_text_texture.free();
-
-	//Free global font
-	//TTF_CloseFont(m_font);
-	//m_font = NULL;
-
-	ui.~UI();
+	m_ui.~UI();
 
 	// Destroy renderer
 	SDL_DestroyRenderer(m_renderer);
@@ -56,26 +47,23 @@ void Game::gameLoop()
 {
 	Input input;
 
-	UI ui;
-
-	ui.loadFont("Lazy.ttf", 60);
+	UI m_ui;
 
 	// Spawns the player at position (x,y)
 	m_player = Player(globals::PLAYER_SPAWN_X, globals::PLAYER_SPAWN_Y);
 
-	SDL_Event event;
+	Level m_level;
 
-	// Load texture media test
-	// m_text_texture = loadMedia();
+	SDL_Event event;
 	
 	// Initialize random seed so rand is not the same every time
 	srand(time(NULL));
 
 	//m_level = Level();
 
-	float time_since_last_frame = SDL_GetTicks();
+	Uint32 time_since_last_frame = SDL_GetTicks();
 
-	float time_last_move = SDL_GetTicks();
+	Uint32 time_last_move = SDL_GetTicks();
 
 	while (true)
 	{
@@ -83,7 +71,7 @@ void Game::gameLoop()
 		while (!game_over)
 		{
 			// Movement tick
-			float time_elapsed_move = SDL_GetTicks();
+			Uint32 time_elapsed_move = SDL_GetTicks();
 
 			if (time_elapsed_move - time_last_move > globals::MOVEMENT_TICK)
 			{
@@ -170,7 +158,8 @@ void Game::gameLoop()
 				return;
 			}
 			if (input.wasKeyPressed(SDL_SCANCODE_SPACE) == true) {
-				printf("New game!");
+				system("CLS");
+				printf("New game! \n");
 				game_over = false;
 			}
 
@@ -188,30 +177,13 @@ void Game::gameLoop()
 
 void Game::update()
 {
-	for (int i = 0; i < m_blocks.size(); i++)
+	// The players change in position (in block size chuncks) 
+	int dx = (m_player.getCurrentX() - m_player.getPrevX()) / globals::BLOCK_SIZE;
+	int dy = (m_player.getCurrentY() - m_player.getPrevY()) / globals::BLOCK_SIZE;
+
+	if (!m_level.check_possible_move(m_player.getCurrentX(), m_player.getCurrentY(), dx, dy))
 	{
-		if (m_blocks.at(i).getX() == m_player.getCurrentX() && m_blocks.at(i).getY() == m_player.getCurrentY())
-		{
-			// The players change in position (in block size chuncks) 
-			int dx = (m_player.getCurrentX() - m_player.getPrevX()) / globals::BLOCK_SIZE;
-			int dy = (m_player.getCurrentY() - m_player.getPrevY()) / globals::BLOCK_SIZE;
-
-			if (m_board[(m_blocks.at(i).getX()) / globals::BLOCK_SIZE + dx][(m_blocks.at(i).getY()) / globals::BLOCK_SIZE + dy] == false)
-			{
-				// Changes the place of the moved block to it new place in the board
-				m_board[(m_blocks.at(i).getX()) / globals::BLOCK_SIZE + dy][(m_blocks.at(i).getY()) / globals::BLOCK_SIZE + dy] = true;
-				// Remove the blocks previous place in the board
-				m_board[(m_blocks.at(i).getX()) / globals::BLOCK_SIZE][(m_blocks.at(i).getY()) / globals::BLOCK_SIZE] = false;
-
-				// Moves the blocks location in the game
-				m_blocks.at(i).move(dx, dy);
-			}
-			else
-			{
-				// If the player cannot move a block because another block is behind it the player is moved back before rendering
-				m_player.move(-dx, -dy);
-			}
-		}
+		m_player.move(-dx, -dy);
 	}
 
 	// Moves block every block down every second and spawns a new block
@@ -219,74 +191,19 @@ void Game::update()
 	{
 		time_block_falling += 1000;
 
-
-		// TODO: does not work when block is being push up
-		// Game over check
-		for (int i = 0; i < m_blocks.size(); i++)
+		if (m_level.game_over_check(m_player.getCurrentX(), m_player.getCurrentY()))
 		{
-			// Check if block is one position above player
-			if (m_blocks.at(i).getX() == m_player.getCurrentX() && m_blocks.at(i).getY() + 32 == m_player.getCurrentY())
-			{
-				if (m_board[m_player.getCurrentX() / globals::BLOCK_SIZE][(m_player.getCurrentY() / globals::BLOCK_SIZE) - 1] == true && m_board[m_player.getCurrentX() / globals::BLOCK_SIZE][(m_player.getCurrentY() / globals::BLOCK_SIZE) - 2] == true)
-				{
-					printf("GAME OVER! \n");
-					game_over = true;
-					break;
-				}
-
-			}
+			game_over = true;
 		}
 
-		// TODO: Without the for loop the red block goes over player render up the player can hold up block
-		// TODO: Remove for loop and if so red block goes over
-		// Find better solution
-
-		// Moves every block on the board and for the renderer
-		for (int i = 0; i < m_blocks.size(); i++)
-		{
-			// Check if block is one position above player
-			if (m_blocks.at(i).getX() == m_player.getCurrentX() && m_blocks.at(i).getY() + 32 == m_player.getCurrentY())
-			{
-				printf("Player holds up block \n");
-			}
-			else
-			{
-				// Moves every block on the board if there is a block
-				m_board[(m_blocks.at(i).getX()) / globals::BLOCK_SIZE][(m_blocks.at(i).getY()) / globals::BLOCK_SIZE] = false;
-				m_board[(m_blocks.at(i).getX()) / globals::BLOCK_SIZE][((m_blocks.at(i).getY()) + globals::BLOCK_SIZE) / globals::BLOCK_SIZE] = true;
-
-				// Move the rendered block on screen
-				m_blocks.at(i).move(0, 1);
-			}
-		}
-
-
-
-		// Create a spawn position at the top block level 10 block_sizes wide in the middle
-		int spawn_pos = (((rand() % 10)) * globals::BLOCK_SIZE) + (globals::SCREEN_WIDTH / 2 - globals::BLOCK_SIZE * 5);
-		// int spawn_pos2 = (((rand() % 20)) * globals::BLOCK_SIZE) + (globals::SCREEN_HEIGHT / 2 - globals::BLOCK_SIZE * 5);
-
-		// Makes a new block in the m_block vector
-		m_blocks.push_back(Block(spawn_pos, 0));
-
-		// Creates the block on the board
-		m_board[spawn_pos / globals::BLOCK_SIZE][0] = true;
+		m_level.update(m_player.getCurrentX(), m_player.getCurrentY());
 	}
 }
 
 void Game::restart()
 {
-	m_blocks.clear();
 
-	// Reset m_board 
-	for (int i = 0; i < globals::SCREEN_WIDTH / globals::BLOCK_SIZE; i++)
-	{
-		for (int j = 0; j < globals::SCREEN_HEIGHT / globals::BLOCK_SIZE; j++)
-		{
-			m_board[i][j] = false;
-		}
-
-	}
+	m_level.reset_board();
 
 	m_player.move_to_spawn();	
 
@@ -302,22 +219,24 @@ void Game::draw(SDL_Renderer *renderer, float frame_rate)
 	// Clear the renderer
 	SDL_RenderClear(m_renderer);
 
-	// m_level.draw(m_renderer);
-
-	// Draw the player object in the backbuffer
-	m_player.draw(m_renderer);
-
-	ui.drawFPS(m_renderer, frame_rate);
-
 	
-	for (int i = 0; i < m_blocks.size(); i++)
+	if(!game_over)
 	{
-		m_blocks.at(i).draw(m_renderer);
+		// Draw the player object in the backbuffer
+		m_player.draw(m_renderer);
 	}
+	else
+	{
+		m_player.DrawDeathBlock(m_renderer);
+	}
+
+	m_level.draw(m_renderer);
+
+	m_ui.drawFPS(m_renderer, frame_rate);
 
 	if (game_over)
 	{
-		ui.drawRestartScreen(m_renderer);
+		m_ui.drawRestartScreen(m_renderer);
 	}
 
 	//Flip backbuffer and frontbuffer 
@@ -387,30 +306,3 @@ bool Game::init()
 	return success;
 }
 
-//LTexture Game::loadMedia()
-//{
-//	//Loading success flag
-//	bool success = true;
-//
-//	//Open the font
-//	m_font = TTF_OpenFont("Lazy.ttf", 60);
-//
-//	if (m_font == NULL)
-//	{
-//		printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
-//		success = false;
-//	}
-//	else
-//	{
-//		// Render text
-//		SDL_Color text_color = { 255, 255, 255 };
-//		if (!m_text_texture.loadFromRenderedText("Test Text!", text_color, m_font, m_renderer))
-//		{
-//			printf("Failed to render text Texture!\n");
-//			success = false;
-//		}
-//	}
-//
-//	return m_text_texture;
-//
-//}

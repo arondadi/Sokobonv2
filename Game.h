@@ -31,15 +31,11 @@ private:
 	SDL_Renderer *m_renderer;
 	SDL_Surface *m_screenSurface;
 
-	// Font and texture
-	//TTF_Font *m_font;
-	//LTexture m_text_texture;
-
 	Player m_player;
 	std::vector<Block> m_blocks;
 	Level m_level;
 
-	UI ui;
+	UI m_ui;
 
 	// Checks for loose conditions
 	bool game_over;

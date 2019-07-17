@@ -5,6 +5,8 @@
 
 #include "Globals.h"
 
+//TODO(Aron): Implement direction facing (not visually, just in code)
+
 class Player
 {
 public:
@@ -16,6 +18,9 @@ public:
 
 	// Draw the player on the backbuffer
 	void draw(SDL_Renderer *renderer);
+
+	// 
+	void DrawDeathBlock(SDL_Renderer *renderer);
 
 	// Move player dx in x direction and dy in y direction
 	void move(int dx, int dy);
@@ -35,6 +40,10 @@ public:
 private:
 	int m_currentX, m_currentY;
 	int m_prevX, m_prevY;
+
+	void GetFacing();
+
+	float m_up, m_down, m_left, m_right;
 
 };
 

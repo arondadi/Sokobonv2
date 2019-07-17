@@ -35,9 +35,36 @@ int Block::getY()
 	return m_y;
 }
 
-void Block::draw(SDL_Renderer *renderer)
+void Block::draw(SDL_Renderer *renderer, enum colors color)
 {
-	SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
+	// Choose correct RenderDrawColor
+	switch (color)
+	{
+	case BLACK:
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		break;
+	case RED:
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		break;
+	case GREEN:
+		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+		break;
+	case BLUE:
+		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+		break;
+	case CYAN:
+		SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
+		break;
+	case MAGENTA:
+		SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+		break;
+	case YELLOW:
+		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+		break;
+	case WHITE:
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		break;
+	}
 
 	SDL_Rect rect{ m_x, m_y, globals::BLOCK_SIZE, globals::BLOCK_SIZE };
 	SDL_RenderFillRect(renderer, &rect);

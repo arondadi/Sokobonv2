@@ -9,6 +9,12 @@ namespace globals
 
 	const int BLOCK_SIZE = 32;
 
+	const int SCREEN_WIDTH_BLOCK = SCREEN_WIDTH / BLOCK_SIZE;
+	const int SCREEN_HEIGHT_BLOCK = SCREEN_HEIGHT / BLOCK_SIZE;
+
+	const int BOARD_WIDTH = 10;
+	const int BOARD_HEIGHT = 20;
+
 	const int FRAME_RATE = 60;
 
 	const int MOVEMENT_TICK = 100;

@@ -15,13 +15,20 @@ UI::~UI()
 		this->m_font = NULL;
 	}
 
+
+	//Free loaded images
+	//m_text_texture.free();
+
+	//Free global font
+	//TTF_CloseFont(m_font);
+	//m_font = NULL;
+
 }
 
 
 
 void UI::loadFont(const char *file_name, int font_size)
 {
-	//TODO(Aron): how to make m_font consisted when the thing is drawn?
 	this->m_font = TTF_OpenFont(file_name, font_size);
 
 	if (!m_font)
@@ -54,6 +61,9 @@ void UI::drawFont(SDL_Renderer *renderer, std::string text, int x, int y, float 
 	SDL_RenderCopy(renderer, message, NULL, &message_rect);
 
 	m_font = NULL;
+	SDL_FreeSurface(surface_message);
+	SDL_DestroyTexture(message);
+
 }
 
 
