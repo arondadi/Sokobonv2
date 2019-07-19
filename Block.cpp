@@ -8,7 +8,8 @@ Block::Block()
 
 Block::Block(int x, int y) :
 	m_x(x),
-	m_y(y)
+	m_y(y),
+	m_state(FREE)
 {
 
 }
@@ -33,6 +34,16 @@ int Block::getX()
 int Block::getY()
 {
 	return m_y;
+}
+
+void Block::ChangeState(states state)
+{
+	m_state = state;
+}
+
+states Block::GetState()
+{
+	return m_state;
 }
 
 void Block::draw(SDL_Renderer *renderer, enum colors color)

@@ -34,6 +34,7 @@ private:
 	Player m_player;
 	std::vector<Block> m_blocks;
 	Level m_level;
+	Block test_block;
 
 	UI m_ui;
 
@@ -55,7 +56,8 @@ private:
 	// Initialize SDL
 	bool init();
 
-	// LTexture loadMedia();
+	// Moving blocks or player
+	bool move_blocks;
 
 
 

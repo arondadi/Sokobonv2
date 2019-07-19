@@ -151,9 +151,25 @@ void Level::reset_board()
 	}
 }
 
+bool Level::CheckTargetPos(int player_x, int player_y)
+{
+	//TODO(Aron): Access m_blocks in memory (pointer?) to see the (x,y) cordinates and change state
+	for (int i = 0; i < m_blocks.size(); i++)
+	{
+		if (((m_blocks.at(i).getX() == player_x + 32 || m_blocks.at(i).getX() == player_x - 32) && m_blocks.at(i).getY() == player_y) || (m_blocks.at(i).getX() == player_x && (m_blocks.at(i).getY() == player_y + 32 || m_blocks.at(i).getY() == player_y - 32)))
+		{
+			m_blocks.at(i).ChangeState(COMBINED);
+
+			return true;
+		}
+	}
+
+	return false;
+}
 
 void Level::update(int player_x, int player_y)
 {
+
 	//TODO(Aron): Make it so that if a block is being pushed by player it does not fall down
 
 	// Moves every block on the board and for the renderer
@@ -183,12 +199,5 @@ void Level::update(int player_x, int player_y)
 	m_board[spawn_pos / globals::BLOCK_SIZE][0] = true;
 }
 
-block_state Level::GetState()
-{
-	return m_state;
-}
 
-void Level::ChangeState(std::string new_state)
-{
 
-}

@@ -9,7 +9,6 @@
 #include "Block.h"
 #include "Player.h"
 
-enum block_state { FREE, COMB_VALID, COMB_INVALID };
 
 class Level
 {
@@ -38,10 +37,8 @@ public:
 	// Depending on the state of the block, it can be moved or not (like Tetris)
 	// Block moving to be implemented in game with controls
 	
+	bool CheckTargetPos(int player_x, int player_y);
 
-	block_state GetState();
-
-	void ChangeState(std::string new_state);
 
 private:
 	std::vector<Block> m_blocks;
@@ -52,8 +49,6 @@ private:
 
 	// Data structure to keep track of the location of blocks in the board
 	bool m_board[globals::SCREEN_WIDTH_BLOCK][globals::SCREEN_HEIGHT_BLOCK];
-
-	block_state m_state;
 };
 
 #endif // !LEVEL_H

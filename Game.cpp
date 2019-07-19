@@ -8,7 +8,8 @@ Game::Game():
 	m_window(NULL),
 	m_screenSurface(NULL),
 	time_block_falling(SDL_GetTicks()),
-	game_over(false)
+	game_over(false),
+	move_blocks(false)
 {
 
 	//Initialize SDL
@@ -52,6 +53,8 @@ void Game::gameLoop()
 	// Spawns the player at position (x,y)
 	m_player = Player(globals::PLAYER_SPAWN_X, globals::PLAYER_SPAWN_Y);
 
+	test_block = Block(globals::PLAYER_SPAWN_X, globals::PLAYER_SPAWN_Y - 64);
+
 	Level m_level;
 
 	SDL_Event event;
@@ -72,6 +75,8 @@ void Game::gameLoop()
 		{
 			// Movement tick
 			Uint32 time_elapsed_move = SDL_GetTicks();
+
+			bool BlockByPlayer = m_level.CheckTargetPos(m_player.getCurrentX(), m_player.getCurrentY());
 
 			if (time_elapsed_move - time_last_move > globals::MOVEMENT_TICK)
 			{
@@ -96,18 +101,58 @@ void Game::gameLoop()
 					this->~Game();
 					return;
 				}
-				else if (input.wasKeyPressed(SDL_SCANCODE_LEFT) == true || input.isKeyHeld(SDL_SCANCODE_LEFT)) {
-					this->m_player.move(-1, 0);
+				else if (input.wasKeyPressed(SDL_SCANCODE_SPACE) == true)
+				{
+
+					
+					if (BlockByPlayer)
+					{
+						// Change the state of block in target position to COMBINED
+
+						if (!move_blocks)
+						{
+							move_blocks = true;
+						}
+						else
+						{
+							move_blocks = false;
+						}
+
+						bool BlockByPlayer = false;
+					}
 				}
-				else if (input.wasKeyPressed(SDL_SCANCODE_RIGHT) == true || input.isKeyHeld(SDL_SCANCODE_RIGHT)) {
-					this->m_player.move(1, 0);
+
+				if (!move_blocks)
+				{
+					if (input.wasKeyPressed(SDL_SCANCODE_LEFT) == true || input.isKeyHeld(SDL_SCANCODE_LEFT)) {
+						this->m_player.move(-1, 0);
+					}
+					else if (input.wasKeyPressed(SDL_SCANCODE_RIGHT) == true || input.isKeyHeld(SDL_SCANCODE_RIGHT)) {
+						this->m_player.move(1, 0);
+					}
+					else if (input.wasKeyPressed(SDL_SCANCODE_DOWN) == true || input.isKeyHeld(SDL_SCANCODE_DOWN)) {
+						this->m_player.move(0, 1);
+					}
+					else if (input.wasKeyPressed(SDL_SCANCODE_UP) == true || input.isKeyHeld(SDL_SCANCODE_UP)) {
+						this->m_player.move(0, -1);
+					}
 				}
-				else if (input.wasKeyPressed(SDL_SCANCODE_DOWN) == true || input.isKeyHeld(SDL_SCANCODE_DOWN)) {
-					this->m_player.move(0, 1);
+				else
+				{
+					if (input.wasKeyPressed(SDL_SCANCODE_LEFT) == true || input.isKeyHeld(SDL_SCANCODE_LEFT)) {
+						this->test_block.move(-1, 0);
+					}
+					else if (input.wasKeyPressed(SDL_SCANCODE_RIGHT) == true || input.isKeyHeld(SDL_SCANCODE_RIGHT)) {
+						this->test_block.move(1, 0);
+					}
+					else if (input.wasKeyPressed(SDL_SCANCODE_DOWN) == true || input.isKeyHeld(SDL_SCANCODE_DOWN)) {
+						this->test_block.move(0, 1);
+					}
+					else if (input.wasKeyPressed(SDL_SCANCODE_UP) == true || input.isKeyHeld(SDL_SCANCODE_UP)) {
+						this->test_block.move(0, -1);
+					}
 				}
-				else if (input.wasKeyPressed(SDL_SCANCODE_UP) == true || input.isKeyHeld(SDL_SCANCODE_UP)) {
-					this->m_player.move(0, -1);
-				}
+
 
 				time_last_move = SDL_GetTicks();
 			}
@@ -186,6 +231,10 @@ void Game::update()
 		m_player.move(-dx, -dy);
 	}
 
+	//TODO(Aron): Check where this function is called and why it does not work in the while loop
+	m_level.CheckTargetPos(m_player.getCurrentX(),m_player.getCurrentY());
+
+
 	// Moves block every block down every second and spawns a new block
 	if (SDL_GetTicks() > time_block_falling)
 	{
@@ -202,7 +251,6 @@ void Game::update()
 
 void Game::restart()
 {
-
 	m_level.reset_board();
 
 	m_player.move_to_spawn();	
@@ -231,6 +279,8 @@ void Game::draw(SDL_Renderer *renderer, float frame_rate)
 	}
 
 	m_level.draw(m_renderer);
+
+	test_block.draw(m_renderer, GREEN);
 
 	m_ui.drawFPS(m_renderer, frame_rate);
 

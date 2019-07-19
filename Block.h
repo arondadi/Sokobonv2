@@ -7,6 +7,8 @@
 
 enum colors { BLACK, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW, WHITE };
 
+enum states { FREE, COMBINED };
+
 class Block
 {
 public:
@@ -30,8 +32,16 @@ public:
 
 	void draw(SDL_Renderer *renderer, enum colors color);
 
+	// Change current state
+	void ChangeState(states state);
+
+	// Get current state
+	states GetState();
+
 private:
 	int m_x, m_y;
+
+	states m_state;
 };
 
 #endif // !BLOCK_h
