@@ -39,7 +39,15 @@ void Level::draw(SDL_Renderer *renderer)
 {
 	for (int i = 0; i < m_blocks.size(); i++)
 	{
-		m_blocks.at(i).draw(renderer, RED);
+		if (m_blocks.at(i).GetState() == FREE)
+		{
+			m_blocks.at(i).draw(renderer, RED);
+		}
+		else if (m_blocks.at(i).GetState() == COMBINED)
+		{
+			m_blocks.at(i).draw(renderer, GREEN);
+		}
+		
 	}
 
 	for (int i = 0; i < m_boundary.size(); i++)
@@ -115,7 +123,6 @@ bool Level::check_collision(int x, int y)
 
 bool Level::game_over_check(int player_x, int player_y)
 {
-
 	// Game over check
 	for (int i = 0; i < m_blocks.size(); i++)
 	{
@@ -159,25 +166,25 @@ bool Level::CheckTargetPos(int player_x, int player_y, facing Facing)
 		switch (Facing)
 		{
 		case RIGHT:
-			if (m_blocks.at(i).getX() == player_x + globals::BLOCK_SIZE)
+			if (m_blocks.at(i).getX() == player_x + globals::BLOCK_SIZE && m_blocks.at(i).getY() == player_y)
 			{
 				m_blocks.at(i).ChangeState(COMBINED);
 				return true;
 			}
 		case LEFT:
-			if (m_blocks.at(i).getX() == player_x - globals::BLOCK_SIZE)
+			if (m_blocks.at(i).getX() == player_x - globals::BLOCK_SIZE && m_blocks.at(i).getY() == player_y)
 			{
 				m_blocks.at(i).ChangeState(COMBINED);
 				return true;
 			}
 		case UP:
-			if (m_blocks.at(i).getY() == player_y - globals::BLOCK_SIZE)
+			if (m_blocks.at(i).getX() == player_x && m_blocks.at(i).getY() == player_y - globals::BLOCK_SIZE)
 			{
 				m_blocks.at(i).ChangeState(COMBINED);
 				return true;
 			}
 		case DOWN:
-			if (m_blocks.at(i).getY() == player_y + globals::BLOCK_SIZE)
+			if (m_blocks.at(i).getX() == player_x && m_blocks.at(i).getY() == player_y + globals::BLOCK_SIZE)
 			{
 				m_blocks.at(i).ChangeState(COMBINED);
 				return true;
@@ -212,7 +219,6 @@ void Level::update(int player_x, int player_y)
 
 	// Create a spawn position at the top block level 10 block_sizes wide in the middle
 	int spawn_pos = (((rand() % 10)) * globals::BLOCK_SIZE) + (globals::SCREEN_WIDTH / 2 - globals::BLOCK_SIZE * 5);
-	// int spawn_pos2 = (((rand() % 20)) * globals::BLOCK_SIZE) + (globals::SCREEN_HEIGHT / 2 - globals::BLOCK_SIZE * 5);
 
 	// Makes a new block in the m_block vector
 	m_blocks.push_back(Block(spawn_pos, - globals::BLOCK_SIZE));
@@ -221,13 +227,24 @@ void Level::update(int player_x, int player_y)
 	m_board[spawn_pos / globals::BLOCK_SIZE][0] = true;
 }
 
+//TODO(Aron): Implement boundaries for moving blocks
+// Move blocks position on m_board
 void Level::MoveCombinedBlocks(int dx, int dy)
 {
-	for (int i = 0; i < m_blocks.size(); i++)
+	for (int indexBlock = 0; indexBlock < m_blocks.size(); indexBlock++)
 	{
-		if (m_blocks.at(i).GetState())
+		if (m_blocks.at(indexBlock).GetState())
 		{
-			m_blocks.at(i).move(dx, dy);
+			m_blocks.at(indexBlock).move(dx, dy);
+			/*for (int indexBound = 0; indexBound < m_boundary.size(); indexBound++)
+			{
+				if (!(m_blocks.at(indexBlock).getX() == m_boundary.at(indexBound).getX() && m_blocks.at(indexBlock).getY() == m_boundary.at(indexBound).getY()))
+				{
+					m_blocks.at(indexBlock).move(dx, dy);
+				}
+			}*/
 		}
+
+		
 	}
 }

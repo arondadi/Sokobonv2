@@ -34,7 +34,6 @@ private:
 	Player m_player;
 	std::vector<Block> m_blocks;
 	Level m_level;
-	Block test_block;
 
 	UI m_ui;
 
@@ -61,11 +60,6 @@ private:
 
 	// Check if there is block in front of player
 	bool BlockByPlayer;
-
-
-
-
-
 };
 
 

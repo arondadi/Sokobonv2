@@ -91,6 +91,39 @@ void Player::draw(SDL_Renderer *renderer)
 
 	SDL_Rect rect{ m_currentX, m_currentY, globals::BLOCK_SIZE, globals::BLOCK_SIZE };
 	SDL_RenderFillRect(renderer, &rect);
+
+	SDL_Rect facingRect{ NULL };
+
+	SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0xff, 0x00);
+	switch (this->CurrentFacing)
+	{
+	case UP:
+		facingRect.x = m_currentX;
+		facingRect.y = m_currentY;
+		facingRect.h = globals::BLOCK_SIZE / 4;
+		facingRect.w = globals::BLOCK_SIZE;
+		break;
+	case DOWN:
+		facingRect.x = m_currentX;
+		facingRect.y = m_currentY + 24; // Bottom of players rect
+		facingRect.h = globals::BLOCK_SIZE / 4;
+		facingRect.w = globals::BLOCK_SIZE;
+		break;
+	case LEFT:
+		facingRect.x = m_currentX;
+		facingRect.y = m_currentY;
+		facingRect.h = globals::BLOCK_SIZE;
+		facingRect.w = globals::BLOCK_SIZE / 4;
+		break;
+	case RIGHT:
+		facingRect.x = m_currentX + 24; // Right side of players rect
+		facingRect.y = m_currentY;
+		facingRect.h = globals::BLOCK_SIZE;
+		facingRect.w = globals::BLOCK_SIZE / 4;
+		break;
+	}
+
+	SDL_RenderFillRect(renderer, &facingRect);
 }
 
 void Player::DrawDeathBlock(SDL_Renderer *renderer)

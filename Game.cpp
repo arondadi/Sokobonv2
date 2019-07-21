@@ -54,9 +54,7 @@ void Game::gameLoop()
 	// Spawns the player at position (x,y)
 	m_player = Player(globals::PLAYER_SPAWN_X, globals::PLAYER_SPAWN_Y);
 
-	test_block = Block(globals::PLAYER_SPAWN_X, globals::PLAYER_SPAWN_Y - 64);
-
-	Level m_level;
+	m_level = Level();
 
 	SDL_Event event;
 	
@@ -103,6 +101,11 @@ void Game::gameLoop()
 				else if (input.wasKeyPressed(SDL_SCANCODE_SPACE) == true)
 				{
 
+					if (!move_blocks)
+					{
+						BlockByPlayer = m_level.CheckTargetPos(m_player.getCurrentX(), m_player.getCurrentY(), m_player.GetFacing());
+					}
+
 					
 					if (BlockByPlayer)
 					{
@@ -139,7 +142,7 @@ void Game::gameLoop()
 				else
 				{
 					if (input.wasKeyPressed(SDL_SCANCODE_LEFT) == true || input.isKeyHeld(SDL_SCANCODE_LEFT)) {
-						m_level.MoveCombinedBlocks(-1, 0);
+						this->m_level.MoveCombinedBlocks(-1, 0);
 					}
 					else if (input.wasKeyPressed(SDL_SCANCODE_RIGHT) == true || input.isKeyHeld(SDL_SCANCODE_RIGHT)) {
 						m_level.MoveCombinedBlocks(1, 0);
@@ -230,10 +233,7 @@ void Game::update()
 		m_player.move(-dx, -dy);
 	}
 
-	//TODO(Aron): Check where this function is called and why it does not work in the while loop
-	BlockByPlayer = m_level.CheckTargetPos(m_player.getCurrentX(),m_player.getCurrentY(), m_player.GetFacing());
-
-
+	
 	// Moves block every block down every second and spawns a new block
 	if (SDL_GetTicks() > time_block_falling)
 	{
@@ -255,6 +255,9 @@ void Game::restart()
 	m_player.move_to_spawn();	
 
 	this->draw(m_renderer, 0);
+
+	move_blocks = false;
+	BlockByPlayer = false;
 }
 
 void Game::draw(SDL_Renderer *renderer, float frame_rate)
@@ -278,8 +281,6 @@ void Game::draw(SDL_Renderer *renderer, float frame_rate)
 	}
 
 	m_level.draw(m_renderer);
-
-	test_block.draw(m_renderer, GREEN);
 
 	m_ui.drawFPS(m_renderer, frame_rate);
 
