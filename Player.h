@@ -6,6 +6,7 @@
 #include "Globals.h"
 
 //TODO(Aron): Implement direction facing (not visually, just in code)
+enum facing { UP, DOWN, LEFT, RIGHT };
 
 class Player
 {
@@ -37,11 +38,14 @@ public:
 	// Get prev Y position
 	int getPrevY();
 
+	// Get current facing direction
+	facing GetFacing();
+
 private:
 	int m_currentX, m_currentY;
 	int m_prevX, m_prevY;
 
-	void GetFacing();
+	facing CurrentFacing;
 
 	float m_up, m_down, m_left, m_right;
 

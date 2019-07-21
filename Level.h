@@ -37,8 +37,10 @@ public:
 	// Depending on the state of the block, it can be moved or not (like Tetris)
 	// Block moving to be implemented in game with controls
 	
-	bool CheckTargetPos(int player_x, int player_y);
+	bool CheckTargetPos(int player_x, int player_y, facing Facing);
 
+	// Move all blocks that have been combined
+	void MoveCombinedBlocks(int dx, int dy);
 
 private:
 	std::vector<Block> m_blocks;

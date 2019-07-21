@@ -14,7 +14,8 @@ m_prevY(y),
 m_up(0), 
 m_down(0), 
 m_left(0), 
-m_right(0)
+m_right(0),
+CurrentFacing(UP)
 {
 
 }
@@ -25,8 +26,25 @@ Player::~Player()
 }
 
 
-void Player::move( int dx, int dy)
+void Player::move(int dx, int dy)
 {
+	if (dx == 1)
+	{
+		CurrentFacing = RIGHT;
+	}
+	else if (dx == -1)
+	{
+		CurrentFacing = LEFT;
+	}
+	else if (dy == 1)
+	{
+		CurrentFacing = DOWN;
+	}
+	else if (dy == -1)
+	{
+		CurrentFacing = UP;
+	}
+
 	m_prevY = m_currentY;
 	m_prevX = m_currentX;
 	m_currentY += dy * globals::BLOCK_SIZE;
@@ -62,37 +80,9 @@ int Player::getPrevY()
 	return m_prevY;
 }
 
-void Player::GetFacing()
+facing Player::GetFacing()
 {
-	int dx = (m_currentX - m_prevX) / globals::BLOCK_SIZE;
-	int dy = (m_currentY - m_prevY) / globals::BLOCK_SIZE;
-
-	m_right = 0;
-	m_left = 0;
-	m_up = 0;
-	m_down = 0;
-
-	if (dx == 1)
-	{
-
-	}
-
-	if (dx == 1)
-	{
-		m_right = 0.2;
-	}
-	else if (dx == -1)
-	{
-		m_left = 0.2;
-	}
-	else if (dy == 1)
-	{
-		m_down = 0.2;
-	}
-	else if (dy == -1)
-	{
-		m_up = 0.2;
-	}
+	return CurrentFacing;
 }
 
 void Player::draw(SDL_Renderer *renderer)

@@ -151,20 +151,42 @@ void Level::reset_board()
 	}
 }
 
-bool Level::CheckTargetPos(int player_x, int player_y)
+bool Level::CheckTargetPos(int player_x, int player_y, facing Facing)
 {
 	//TODO(Aron): Access m_blocks in memory (pointer?) to see the (x,y) cordinates and change state
 	for (int i = 0; i < m_blocks.size(); i++)
 	{
-		if (((m_blocks.at(i).getX() == player_x + 32 || m_blocks.at(i).getX() == player_x - 32) && m_blocks.at(i).getY() == player_y) || (m_blocks.at(i).getX() == player_x && (m_blocks.at(i).getY() == player_y + 32 || m_blocks.at(i).getY() == player_y - 32)))
+		switch (Facing)
 		{
-			m_blocks.at(i).ChangeState(COMBINED);
-
-			return true;
+		case RIGHT:
+			if (m_blocks.at(i).getX() == player_x + globals::BLOCK_SIZE)
+			{
+				m_blocks.at(i).ChangeState(COMBINED);
+				return true;
+			}
+		case LEFT:
+			if (m_blocks.at(i).getX() == player_x - globals::BLOCK_SIZE)
+			{
+				m_blocks.at(i).ChangeState(COMBINED);
+				return true;
+			}
+		case UP:
+			if (m_blocks.at(i).getY() == player_y - globals::BLOCK_SIZE)
+			{
+				m_blocks.at(i).ChangeState(COMBINED);
+				return true;
+			}
+		case DOWN:
+			if (m_blocks.at(i).getY() == player_y + globals::BLOCK_SIZE)
+			{
+				m_blocks.at(i).ChangeState(COMBINED);
+				return true;
+			}
 		}
 	}
 
 	return false;
+
 }
 
 void Level::update(int player_x, int player_y)
@@ -199,5 +221,13 @@ void Level::update(int player_x, int player_y)
 	m_board[spawn_pos / globals::BLOCK_SIZE][0] = true;
 }
 
-
-
+void Level::MoveCombinedBlocks(int dx, int dy)
+{
+	for (int i = 0; i < m_blocks.size(); i++)
+	{
+		if (m_blocks.at(i).GetState())
+		{
+			m_blocks.at(i).move(dx, dy);
+		}
+	}
+}

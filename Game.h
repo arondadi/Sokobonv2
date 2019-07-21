@@ -59,6 +59,9 @@ private:
 	// Moving blocks or player
 	bool move_blocks;
 
+	// Check if there is block in front of player
+	bool BlockByPlayer;
+
 
 
 

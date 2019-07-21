@@ -9,7 +9,8 @@ Game::Game():
 	m_screenSurface(NULL),
 	time_block_falling(SDL_GetTicks()),
 	game_over(false),
-	move_blocks(false)
+	move_blocks(false),
+	BlockByPlayer(false)
 {
 
 	//Initialize SDL
@@ -76,8 +77,6 @@ void Game::gameLoop()
 			// Movement tick
 			Uint32 time_elapsed_move = SDL_GetTicks();
 
-			bool BlockByPlayer = m_level.CheckTargetPos(m_player.getCurrentX(), m_player.getCurrentY());
-
 			if (time_elapsed_move - time_last_move > globals::MOVEMENT_TICK)
 			{
 				input.beginNewFrame();
@@ -140,16 +139,16 @@ void Game::gameLoop()
 				else
 				{
 					if (input.wasKeyPressed(SDL_SCANCODE_LEFT) == true || input.isKeyHeld(SDL_SCANCODE_LEFT)) {
-						this->test_block.move(-1, 0);
+						m_level.MoveCombinedBlocks(-1, 0);
 					}
 					else if (input.wasKeyPressed(SDL_SCANCODE_RIGHT) == true || input.isKeyHeld(SDL_SCANCODE_RIGHT)) {
-						this->test_block.move(1, 0);
+						m_level.MoveCombinedBlocks(1, 0);
 					}
 					else if (input.wasKeyPressed(SDL_SCANCODE_DOWN) == true || input.isKeyHeld(SDL_SCANCODE_DOWN)) {
-						this->test_block.move(0, 1);
+						m_level.MoveCombinedBlocks(0,1);
 					}
 					else if (input.wasKeyPressed(SDL_SCANCODE_UP) == true || input.isKeyHeld(SDL_SCANCODE_UP)) {
-						this->test_block.move(0, -1);
+						m_level.MoveCombinedBlocks(0,-1);
 					}
 				}
 
@@ -232,7 +231,7 @@ void Game::update()
 	}
 
 	//TODO(Aron): Check where this function is called and why it does not work in the while loop
-	m_level.CheckTargetPos(m_player.getCurrentX(),m_player.getCurrentY());
+	BlockByPlayer = m_level.CheckTargetPos(m_player.getCurrentX(),m_player.getCurrentY(), m_player.GetFacing());
 
 
 	// Moves block every block down every second and spawns a new block
