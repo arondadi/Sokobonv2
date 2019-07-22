@@ -56,12 +56,12 @@ void Game::gameLoop()
 
 	m_level = Level();
 
+	test_level = LevelPtr();
+
 	SDL_Event event;
 	
 	// Initialize random seed so rand is not the same every time
 	srand(time(NULL));
-
-	//m_level = Level();
 
 	Uint32 time_since_last_frame = SDL_GetTicks();
 
@@ -100,27 +100,22 @@ void Game::gameLoop()
 				}
 				else if (input.wasKeyPressed(SDL_SCANCODE_SPACE) == true)
 				{
-
 					if (!move_blocks)
 					{
-						BlockByPlayer = m_level.CheckTargetPos(m_player.getCurrentX(), m_player.getCurrentY(), m_player.GetFacing());
+						move_blocks = true;
 					}
-
+					else
+					{
+						move_blocks = false;
+					}
 					
-					if (BlockByPlayer)
+				}
+				else if (input.wasKeyPressed(SDL_SCANCODE_LCTRL) == true)
+				{
+					if (!move_blocks)
 					{
 						// Change the state of block in target position to COMBINED
-
-						if (!move_blocks)
-						{
-							move_blocks = true;
-						}
-						else
-						{
-							move_blocks = false;
-						}
-
-						bool BlockByPlayer = false;
+						BlockByPlayer = m_level.CheckTargetPos(m_player.getCurrentX(), m_player.getCurrentY(), m_player.GetFacing());
 					}
 				}
 
@@ -233,6 +228,7 @@ void Game::update()
 		m_player.move(-dx, -dy);
 	}
 
+
 	
 	// Moves block every block down every second and spawns a new block
 	if (SDL_GetTicks() > time_block_falling)
@@ -245,6 +241,7 @@ void Game::update()
 		}
 
 		m_level.update(m_player.getCurrentX(), m_player.getCurrentY());
+		test_level.update(m_player.getCurrentX(), m_player.getCurrentY());
 	}
 }
 

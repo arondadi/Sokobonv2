@@ -133,7 +133,6 @@ bool Level::game_over_check(int player_x, int player_y)
 			{
 				printf("GAME OVER! \n");
 				return true;
-				//game_over = true;
 				break;
 			}
 
@@ -193,12 +192,10 @@ bool Level::CheckTargetPos(int player_x, int player_y, facing Facing)
 	}
 
 	return false;
-
 }
 
 void Level::update(int player_x, int player_y)
 {
-
 	//TODO(Aron): Make it so that if a block is being pushed by player it does not fall down
 
 	// Moves every block on the board and for the renderer
@@ -233,18 +230,52 @@ void Level::MoveCombinedBlocks(int dx, int dy)
 {
 	for (int indexBlock = 0; indexBlock < m_blocks.size(); indexBlock++)
 	{
-		if (m_blocks.at(indexBlock).GetState())
+		if (m_blocks.at(indexBlock).GetState() == COMBINED)
 		{
-			m_blocks.at(indexBlock).move(dx, dy);
-			/*for (int indexBound = 0; indexBound < m_boundary.size(); indexBound++)
-			{
-				if (!(m_blocks.at(indexBlock).getX() == m_boundary.at(indexBound).getX() && m_blocks.at(indexBlock).getY() == m_boundary.at(indexBound).getY()))
-				{
-					m_blocks.at(indexBlock).move(dx, dy);
-				}
-			}*/
-		}
+			(this->checkBlockMove(m_blocks.at(indexBlock).getX(), m_blocks.at(indexBlock).getY(), dx, dy, indexBlock));
 
-		
+			//// Move the COMBINED block by (dx, dy) in possible
+			//if ((this->checkBlockMove(m_blocks.at(indexBlock).getX(), m_blocks.at(indexBlock).getY(), dx, dy, indexBlock)))
+			//{
+			//	//m_blocks.at(indexBlock).move(dx, dy);
+			//}
+		}
 	}
+}
+
+bool Level::checkBlockMove(int currentX, int currentY, int dx, int dy, int checkIndex)
+{
+	for (int indexBound = 0; indexBound < m_boundary.size(); indexBound++)
+	{
+		if (m_boundary.at(indexBound).getX() == (currentX + dx*globals::BLOCK_SIZE) && m_boundary.at(indexBound).getY() == (currentY /*+ dy*globals::BLOCK_SIZE*/))
+		{
+			return false;
+		}
+	}
+
+	for (int indexBlock = 0; indexBlock < m_blocks.size(); indexBlock++)
+	{
+		if (m_blocks.at(indexBlock).getX() == currentX && m_blocks.at(indexBlock).getY() == currentY) // && checkIndex != indexBlock
+		{
+			if (m_board[(m_blocks.at(indexBlock).getX()) / globals::BLOCK_SIZE + dx][(m_blocks.at(indexBlock).getY()) / globals::BLOCK_SIZE + dy] == false) // && checkIndex != indexBlock
+			{
+				// Changes the place of the moved block to it new place in the board
+				m_board[(m_blocks.at(indexBlock).getX()) / globals::BLOCK_SIZE + dx][(m_blocks.at(indexBlock).getY()) / globals::BLOCK_SIZE + dy] = true;
+				// Remove the blocks previous place in the board
+				m_board[(m_blocks.at(indexBlock).getX()) / globals::BLOCK_SIZE][(m_blocks.at(indexBlock).getY()) / globals::BLOCK_SIZE] = false;
+
+				// Moves the blocks location in the game
+				m_blocks.at(indexBlock).move(dx, dy);
+
+				return true;
+			}
+			else
+			{
+				// If the player cannot move a block because another block is behind it the player is moved back before rendering
+				return false;
+			}
+		}
+	}
+
+	return true;
 }

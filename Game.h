@@ -15,6 +15,7 @@
 #include "Globals.h"
 #include "Player.h"
 #include "Level.h"
+#include "LevelPtr.h"
 #include "Input.h"
 #include "Block.h"
 #include "UI.h"
@@ -34,6 +35,8 @@ private:
 	Player m_player;
 	std::vector<Block> m_blocks;
 	Level m_level;
+
+	LevelPtr test_level;
 
 	UI m_ui;
 
