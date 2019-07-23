@@ -29,8 +29,8 @@ void Level::intilize_board()
 {
 	for(int index_height = 0; index_height < globals::SCREEN_HEIGHT; index_height++)
 	{
-		m_boundary.push_back(Block((globals::SCREEN_WIDTH_BLOCK + globals::BOARD_WIDTH) / 2 * globals::BLOCK_SIZE, index_height * globals::BLOCK_SIZE));
-		m_boundary.push_back(Block((globals::SCREEN_WIDTH_BLOCK - globals::BOARD_WIDTH - 1) / 2 * globals::BLOCK_SIZE, index_height * globals::BLOCK_SIZE));
+		m_boundary.push_back(Block((globals::SCREEN_WIDTH_BLOCK + globals::BOARD_WIDTH) / 2 * globals::BLOCK_SIZE, index_height * globals::BLOCK_SIZE, EMPTY));
+		m_boundary.push_back(Block((globals::SCREEN_WIDTH_BLOCK - globals::BOARD_WIDTH - 1) / 2 * globals::BLOCK_SIZE, index_height * globals::BLOCK_SIZE, EMPTY));
 	}
 }
 
@@ -218,13 +218,12 @@ void Level::update(int player_x, int player_y)
 	int spawn_pos = (((rand() % 10)) * globals::BLOCK_SIZE) + (globals::SCREEN_WIDTH / 2 - globals::BLOCK_SIZE * 5);
 
 	// Makes a new block in the m_block vector
-	m_blocks.push_back(Block(spawn_pos, - globals::BLOCK_SIZE));
+	m_blocks.push_back(Block(spawn_pos, - globals::BLOCK_SIZE, FREE));
 
 	// Creates the block on the board
 	m_board[spawn_pos / globals::BLOCK_SIZE][0] = true;
 }
 
-//TODO(Aron): Implement boundaries for moving blocks
 // Move blocks position on m_board
 void Level::MoveCombinedBlocks(int dx, int dy)
 {

@@ -7,7 +7,7 @@
 
 enum colors { BLACK, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW, WHITE };
 
-enum states { FREE, COMBINED };
+enum states { EMPTY, FREE, COMBINED };
 
 class Block
 {
@@ -16,10 +16,13 @@ public:
 	Block();
 
 	// Constructor
-	Block(int x, int y);
+	Block(int x, int y, states state);
 
 	// Deconstructor
 	~Block();
+
+	// Spawn block on playing board
+	void SpawnBlock(int x, int y);
 
 	// Move according to collision with player
 	void move(int dx, int dy);

@@ -1,8 +1,15 @@
 #include "LevelPtr.h"
 
-LevelPtr::LevelPtr() :
-	m_board{ NULL }
+LevelPtr::LevelPtr()
 {
+
+	//for (int indexW = 0; indexW < globals::BOARD_WIDTH; indexW++)
+	//{
+	//	for (int indexH = 0; indexH < globals::BOARD_HEIGHT; indexH++)
+	//	{
+	//		m_board[indexW][indexH] = new Block();
+	//	}
+	//}
 
 	// Initialize random seed so rand is not the same every time
 	srand(time(NULL));
@@ -10,13 +17,13 @@ LevelPtr::LevelPtr() :
 	// Draw the walls
 	this->intilize_board();
 
-	//for (int index_width = 0; index_width < globals::SCREEN_WIDTH_BLOCK; index_width++)
-	//{
-	//	for (int index_height = 0; index_height < globals::SCREEN_HEIGHT_BLOCK; index_height++)
-	//	{
-	//		m_board[index_width][index_height] = Block(0, 0);
-	//	}
-	//}
+	for (int indexW = 0; indexW < globals::BOARD_WIDTH; indexW++)
+	{
+		for (int indexH = 0; indexH < globals::BOARD_HEIGHT; indexH++)
+		{
+			this->m_board[indexW][indexH] = new Block(indexH * globals::BLOCK_SIZE, indexW * globals::BLOCK_SIZE, EMPTY);
+		}
+	}
 }
 
 
@@ -29,25 +36,29 @@ void LevelPtr::intilize_board()
 {
 	for (int index_height = 0; index_height < globals::SCREEN_HEIGHT; index_height++)
 	{
-		m_boundary.push_back(Block((globals::SCREEN_WIDTH_BLOCK + globals::BOARD_WIDTH) / 2 * globals::BLOCK_SIZE, index_height * globals::BLOCK_SIZE));
-		m_boundary.push_back(Block((globals::SCREEN_WIDTH_BLOCK - globals::BOARD_WIDTH - 1) / 2 * globals::BLOCK_SIZE, index_height * globals::BLOCK_SIZE));
+		m_boundary.push_back(Block((globals::SCREEN_WIDTH_BLOCK + globals::BOARD_WIDTH) / 2 * globals::BLOCK_SIZE, index_height * globals::BLOCK_SIZE, EMPTY));
+		m_boundary.push_back(Block((globals::SCREEN_WIDTH_BLOCK - globals::BOARD_WIDTH - 1) / 2 * globals::BLOCK_SIZE, index_height * globals::BLOCK_SIZE, EMPTY));
 	}
+
+
 }
 
 
 void LevelPtr::draw(SDL_Renderer *renderer)
 {
-	for (int i = 0; i < m_blocks.size(); i++)
+	for (int indexW = 0; indexW < globals::BOARD_WIDTH; indexW++)
 	{
-		if (m_blocks.at(i).GetState() == FREE)
+		for (int indexH = 0; indexH < globals::BOARD_HEIGHT; indexH++)
 		{
-			m_blocks.at(i).draw(renderer, RED);
+			if (m_board[indexW][indexH]->GetState() == FREE)
+			{
+				m_board[indexW][indexH]->draw(renderer, RED);
+			}
+			else if (m_board[indexW][indexH]->GetState() == COMBINED)
+			{
+				m_board[indexW][indexH]->draw(renderer, GREEN);
+			}
 		}
-		else if (m_blocks.at(i).GetState() == COMBINED)
-		{
-			m_blocks.at(i).draw(renderer, GREEN);
-		}
-
 	}
 
 	for (int i = 0; i < m_boundary.size(); i++)
@@ -55,6 +66,7 @@ void LevelPtr::draw(SDL_Renderer *renderer)
 		m_boundary.at(i).draw(renderer, BLUE);
 	}
 }
+
 //
 //bool LevelPtr::check_possible_move(int current_x, int current_y, int dx, int dy)
 //{
@@ -199,29 +211,46 @@ void LevelPtr::update(int player_x, int player_y)
 	//TODO(Aron): Make it so that if a block is being pushed by player it does not fall down
 
 	// Moves every block on the board and for the renderer
-	for (int i = 0; i < m_blocks.size(); i++)
+	for (int indexW = 0; indexW < globals::BOARD_WIDTH; indexW++)
 	{
-		// Check if block is one position above player
-		if (!(m_blocks.at(i).getX() == player_x && m_blocks.at(i).getY() + globals::BLOCK_SIZE == player_y))
+		for (int indexH = 0; indexH < globals::BOARD_HEIGHT; indexH++)
 		{
-			// Moves every block on the board if there is a block
-			m_board[(m_blocks.at(i).getX()) / globals::BLOCK_SIZE][(m_blocks.at(i).getY()) / globals::BLOCK_SIZE] = false;
-			m_board[(m_blocks.at(i).getX()) / globals::BLOCK_SIZE][((m_blocks.at(i).getY()) + globals::BLOCK_SIZE) / globals::BLOCK_SIZE] = true;
+			if (indexH > 0)
+			{
+				// Check if block is one position above player
+				if (!(m_board[indexW][indexH]->getX() == player_x && m_board[indexW][indexH - 1]->getY() == player_y))
+				{
+					// Moves the block in the renderer
+					m_board[indexW][indexH]->move(0, 1);
 
-			// Move the rendered block on screen
-			m_blocks.at(i).move(0, 1);
+					printf("indexW: %d, indexH: %d \n", indexW, indexH);
+					
+					if (indexH < globals::BOARD_HEIGHT - 1)
+					{
+						// Moves the block on the board
+						*&m_board[indexW][indexH] = m_board[indexW][indexH + 1];
+						m_board[indexW][indexH]->ChangeState(EMPTY);
+					}
+					else
+					{
+						m_board[indexW][indexH]->ChangeState(EMPTY);
+					}
+
+				}
+			}
 		}
-
 	}
 
 	// Create a spawn position at the top block level 10 block_sizes wide in the middle
-	int spawn_pos = (((rand() % 10)) * globals::BLOCK_SIZE) + (globals::SCREEN_WIDTH / 2 - globals::BLOCK_SIZE * 5);
+	int spawn_pos_pixels = (((rand() % 10)) * globals::BLOCK_SIZE) + (globals::SCREEN_WIDTH / 2 - globals::BLOCK_SIZE * 5);
+	int spawn_pos = ((rand() % 10)) + (globals::BOARD_WIDTH / 2 -  5);
 
-	// Makes a new block in the m_block vector
-	m_blocks.push_back(Block(spawn_pos, -globals::BLOCK_SIZE));
+	//TODO(Aron): make a new Block( allocate memory for it ) and point m_board to it
 
-	// Creates the block on the board
-	m_board[spawn_pos / globals::BLOCK_SIZE][0] = true;
+	Block newBlock = Block(spawn_pos_pixels, 0, FREE);
+
+	m_board[spawn_pos][0]->SpawnBlock(spawn_pos_pixels, 0);
+	
 }
 //
 ////TODO(Aron): Implement boundaries for moving blocks

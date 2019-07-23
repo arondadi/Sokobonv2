@@ -56,7 +56,7 @@ void Game::gameLoop()
 
 	m_level = Level();
 
-	test_level = LevelPtr();
+	//test_level = LevelPtr();
 
 	SDL_Event event;
 	
@@ -241,7 +241,7 @@ void Game::update()
 		}
 
 		m_level.update(m_player.getCurrentX(), m_player.getCurrentY());
-		test_level.update(m_player.getCurrentX(), m_player.getCurrentY());
+		//test_level.update(m_player.getCurrentX(), m_player.getCurrentY());
 	}
 }
 
@@ -278,6 +278,7 @@ void Game::draw(SDL_Renderer *renderer, float frame_rate)
 	}
 
 	m_level.draw(m_renderer);
+	//test_level.draw(m_renderer);
 
 	m_ui.drawFPS(m_renderer, frame_rate);
 

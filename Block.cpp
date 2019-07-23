@@ -6,12 +6,19 @@ Block::Block()
 
 }
 
-Block::Block(int x, int y) :
+Block::Block(int x, int y, states state) :
 	m_x(x),
 	m_y(y),
-	m_state(FREE)
+	m_state(state)
 {
 
+}
+
+void Block::SpawnBlock(int x, int y)
+{
+	this->m_x = x;
+	this->m_y = y;
+	this->m_state = FREE;
 }
 
 Block::~Block()
@@ -21,29 +28,29 @@ Block::~Block()
 
 void Block::move(int dx, int dy)
 {
-	m_x += dx * globals::BLOCK_SIZE;
-	m_y += dy * globals::BLOCK_SIZE;
+	this->m_x += dx * globals::BLOCK_SIZE;
+	this->m_y += dy * globals::BLOCK_SIZE;
 }
 
 
 int Block::getX()
 {
-	return m_x;
+	return this->m_x;
 }
 
 int Block::getY()
 {
-	return m_y;
+	return this->m_y;
 }
 
 void Block::ChangeState(states state)
 {
-	m_state = state;
+	this->m_state = state;
 }
 
 states Block::GetState()
 {
-	return m_state;
+	return this->m_state;
 }
 
 void Block::draw(SDL_Renderer *renderer, enum colors color)
@@ -77,6 +84,6 @@ void Block::draw(SDL_Renderer *renderer, enum colors color)
 		break;
 	}
 
-	SDL_Rect rect{ m_x, m_y, globals::BLOCK_SIZE, globals::BLOCK_SIZE };
+	SDL_Rect rect{ this->m_x, this->m_y, globals::BLOCK_SIZE, globals::BLOCK_SIZE };
 	SDL_RenderFillRect(renderer, &rect);
 }

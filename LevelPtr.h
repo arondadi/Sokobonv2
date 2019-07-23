@@ -55,7 +55,8 @@ private:
 	//Get rid of m_blocks and use m_board pointers instead
 
 	// Data structure to keep track of the location of blocks in the board
-	Block *m_board[globals::SCREEN_WIDTH_BLOCK][globals::SCREEN_HEIGHT_BLOCK];
+	//Block *p_board[globals::SCREEN_WIDTH_BLOCK][globals::SCREEN_HEIGHT_BLOCK];
+	Block *m_board[globals::BOARD_WIDTH][globals::BOARD_HEIGHT];
 };
 
 #endif // !LEVELPTR_H
